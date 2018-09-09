@@ -14,7 +14,11 @@
 
 use std::io::{Read, Write};
 use std::io::Result as IoResult;
-use std::net::{SocketAddr, TcpStream, Shutdown};
+#[cfg(feature = "usnet")]
+use usnet_sockets::TcpStream;
+#[cfg(not(feature = "usnet"))]
+use std::net::TcpStream;
+use std::net::{SocketAddr, Shutdown};
 
 #[cfg(feature = "ssl")]
 use std::sync::{Arc, Mutex};

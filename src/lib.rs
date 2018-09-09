@@ -118,6 +118,9 @@ extern crate chrono;
 #[cfg(feature = "ssl")]
 extern crate openssl;
 
+#[cfg(feature = "usnet")]
+extern crate usnet_sockets;
+
 use std::error::Error;
 use std::io::Error as IoError;
 use std::io::Result as IoResult;
@@ -125,7 +128,11 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::thread;
 use std::net;
-use std::net::{ToSocketAddrs, TcpStream, Shutdown};
+#[cfg(feature = "usnet")]
+use usnet_sockets::{TcpStream, TcpListener, UsnetToSocketAddrs as ToSocketAddrs};
+#[cfg(not(feature = "usnet"))]
+use std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use std::net::Shutdown;
 use std::time::Duration;
 use std::sync::atomic::Ordering::Relaxed;
 
@@ -240,7 +247,7 @@ impl Server {
 
         // building the TcpListener
         let (server, local_addr) = {
-            let listener = try!(net::TcpListener::bind(config.addr));
+            let listener = try!(TcpListener::bind(config.addr));
             let local_addr = try!(listener.local_addr());
             debug!("Server listening on {}", local_addr);
             (listener, local_addr)
